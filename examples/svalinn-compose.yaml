@@ -44,7 +44,7 @@ services:
   backend:
     image: ghcr.io/myorg/myapp:v1.0.0
     environment:
-      DATABASE_URL: postgres://postgres:secret@db:5432/myapp
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/myapp
       REDIS_URL: redis://cache:6379
       NODE_ENV: production
     depends_on:
