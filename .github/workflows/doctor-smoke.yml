@@ -77,4 +77,5 @@ jobs:
           name: doctor-report
           path: vordr/doctor-report.json
 permissions:
+  actions: read
   contents: read

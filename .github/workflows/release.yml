@@ -206,4 +206,5 @@ jobs:
 
             See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
 permissions:
+  actions: read
   contents: read

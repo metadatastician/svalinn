@@ -61,4 +61,5 @@ jobs:
             echo "| $(basename $schema) | $title | $version |" >> $GITHUB_STEP_SUMMARY
           done
 permissions:
+  actions: read
   contents: read

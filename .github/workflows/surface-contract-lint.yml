@@ -80,4 +80,5 @@ jobs:
             echo ":white_check_mark: No surface changes detected" >> $GITHUB_STEP_SUMMARY
           fi
 permissions:
+  actions: read
   contents: read

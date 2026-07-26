@@ -117,4 +117,5 @@ jobs:
           echo "| System df | :white_check_mark: |" >> $GITHUB_STEP_SUMMARY
           echo "| System prune | :white_check_mark: |" >> $GITHUB_STEP_SUMMARY
 permissions:
+  actions: read
   contents: read
