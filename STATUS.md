@@ -37,7 +37,7 @@
 
 - `.claude/CLAUDE.md` grants `tools/mvp/svalinn_gateway.ts` an explicit TypeScript exemption with a named unblock condition: 'Promote svalinn to production tier; rewrite gateway in AffineScript at that point.' So promoting the MVP TRIGGERS the condition requiring the rewrite. The real question is what tier svalinn is.
 - OPEN RULING R2: measure before deciding — AffineScript's OCaml compiler is now real and green; point it at one `.affine` file and see how far it gets.
-- The `guix.scm` identity and the deliberate PMPL->MPL-2.0 licence migration (373bc49) were both clobbered by the 2026-07-26 squisher-corpus sweep; restored in PR #14.
+- The `guix.scm` identity and the deliberate PMPL->MPL-2.0 licence migration (373bc49) were both clobbered by the 2026-07-26 squisher-corpus sweep; restored and merged 2026-07-28.
 
 ## Next actions
 
@@ -47,6 +47,28 @@
 4. Delete or repoint the four workflows filtering on the nonexistent vordr/** path
 5. Rewrite ecosystem.yaml to cover all six repos, or delete it
 6. Populate evidence/ or stop citing it in EVALUATION-REPORT.adoc
+
+## CI/CD status
+
+As of 2026-07-28, post-merge: **21/21 workflows parse clean**, with zero
+illegal `timeout-minutes` on reusable-call jobs and zero phantom `codeql-action` SHAs.
+(Three sweep-introduced fault classes were repaired and merged on this date — see the
+ecosystem sitrep for the taxonomy.)
+
+**Gates that genuinely enforce something:**
+
+- `ci.yml` — `deno lint`, `deno fmt --check`, `deno check`, `deno test`; 5 gating jobs with `needs:`
+
+**Gates that run but cannot fail (or check nothing):**
+
+- `codeql.yml` pinned to `language: actions` — zero application source analysed
+- `e2e-readme.yml` — six of six `vordr` invocations are `|| true`
+- `conformance-consumer.yml` — the conformance suite cannot fail conformance (`|| true`)
+- `surface-contract-lint.yml` — every finding is `::warning::` only
+- 4 workflows filter on `paths: ['vordr/**']`; **`svalinn/vordr/` does not exist**, so they can never trigger
+
+> A gate is not done until it has been observed to **fail** on a deliberate defect.
+> Every fake gate listed above passed its own review.
 
 ## Ecosystem position
 
