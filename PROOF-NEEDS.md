@@ -1,3 +1,9 @@
+> [!WARNING]
+> **SUPERSEDED — this document contains claims falsified by measurement on 2026-07-28.**
+> See `STATUS.md` in this repo for measured state, and
+> `dev-notes/stapeln-ecosystem-COMPREHENSIVE-SITREP-2026-07-28.md` for full evidence.
+> Falsified here: states 'Languages: ReScript' and cites src/abi/*.idr and '20+ Obj.magic calls' — the repo has 0 .res files, 0 .idr files, and no src/abi/. Retained for history; do not cite.
+
 <!--
 SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
