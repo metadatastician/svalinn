@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
+# This workflow is managed by gh actions-lock.
 name: Doctor Smoke Test
 on:
   push:
@@ -20,14 +21,14 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@4be9e76fd7c4901c61fb841f559994984270fce7 # stable
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           components: clippy
       - name: Cache cargo
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v4
+        uses: actions/cache@v6.1.0
         with:
           path: |
             ~/.cargo/bin/
@@ -71,7 +72,7 @@ jobs:
           echo "## Doctor Summary" >> $GITHUB_STEP_SUMMARY
           ./target/release/vordr doctor --format json | jq -r '"- Passed: \(.summary.passed)\n- Warnings: \(.summary.warnings)\n- Errors: \(.summary.errors)"' >> $GITHUB_STEP_SUMMARY
       - name: Upload doctor report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v7.0.1
         if: always()
         with:
           name: doctor-report
