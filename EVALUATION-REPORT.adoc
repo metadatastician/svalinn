@@ -1,3 +1,9 @@
+// SUPERSEDED — contains claims falsified by measurement 2026-07-28.
+// See STATUS.md in this repo and
+// dev-notes/stapeln-ecosystem-COMPREHENSIVE-SITREP-2026-07-28.md
+// Falsified: mandates 'a rating without evidence is invalid' while evidence/ contains only .gitkeep; its Onboarding rating cites a file in the vordr repository
+// Retained for history; do not cite.
+
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Evaluation Report
