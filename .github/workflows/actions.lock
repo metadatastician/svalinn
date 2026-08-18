@@ -41,7 +41,7 @@ workflows:
     '.github/workflows/oikosbot.yml':
         - 'actions/checkout@v7.0.1'
         - 'github/codeql-action@v4.37.3'
-        - 'hyperpolymath/oikosbot@v0.1.0'
+        - 'hyperpolymath/oikosbot@v0.1.1'
     '.github/workflows/publish-image.yml':
         - 'actions/attest-build-provenance@v4.1.1'
         - 'actions/checkout@v7.0.1'
@@ -177,9 +177,9 @@ dependencies:
         commit: 'sha1-cd0d9bdd65b20557f41bea4dbe43d0b5fbbfe553'
         owner_id: 75048950
         repo_id: 623796603
-    'hyperpolymath/oikosbot@v0.1.0':
-        ref: 'v0.1.0'
-        commit: 'sha1-bb95ab5063ab9b43a948e21ed8b3fe35b1d1768b'
+    'hyperpolymath/oikosbot@v0.1.1':
+        ref: 'v0.1.1'
+        commit: 'sha1-f00dec4597dde6071a7f0fe38414c13b5847f316'
         owner_id: 6759885
         repo_id: 1274526902
     'peter-evans/repository-dispatch@v4.0.1':
