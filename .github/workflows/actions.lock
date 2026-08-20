@@ -11,7 +11,7 @@ workflows:
         - 'actions/configure-pages@v6.0.0'
         - 'actions/deploy-pages@v5.0.0'
         - 'actions/upload-pages-artifact@v5.0.0'
-        - 'haskell-actions/setup@v2.11.0'
+        - 'haskell-actions/setup@v2.12.0'
     '.github/workflows/ci.yml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
@@ -40,10 +40,10 @@ workflows:
     '.github/workflows/mirror.yml': []
     '.github/workflows/oikosbot.yml':
         - 'actions/checkout@v7.0.1'
-        - 'github/codeql-action@v4.37.3'
+        - 'github/codeql-action@v4.37.6'
         - 'hyperpolymath/oikosbot@v0.1.1'
     '.github/workflows/publish-image.yml':
-        - 'actions/attest-build-provenance@v4.1.1'
+        - 'actions/attest-build-provenance@v4.2.2'
         - 'actions/checkout@v7.0.1'
         - 'docker/build-push-action@v7.3.0'
         - 'docker/login-action@v4.6.0'
@@ -52,7 +52,7 @@ workflows:
     '.github/workflows/push-email-notify.yml':
         - 'dawidd6/action-send-mail@v3.12.0'
     '.github/workflows/release.yml':
-        - 'actions/attest-build-provenance@v4.1.1'
+        - 'actions/attest-build-provenance@v4.2.2'
         - 'actions/checkout@v7.0.1'
         - 'actions/download-artifact@v8.0.1'
         - 'actions/upload-artifact@v7.0.1'
@@ -68,16 +68,16 @@ workflows:
     '.github/workflows/workflow-linter.yml':
         - 'actions/checkout@v7.0.1'
 dependencies:
-    'actions/attest-build-provenance@v4.1.1':
-        ref: 'v4.1.1'
-        commit: 'sha1-0f67c3f4856b2e3261c31976d6725780e5e4c373'
+    'actions/attest-build-provenance@v4.2.2':
+        ref: 'v4.2.2'
+        commit: 'sha1-4d101475d8b20a2381f78447822ac1eab6504dd8'
         owner_id: 44036562
         repo_id: 760702757
         uses:
-            - 'actions/attest@a1948c3f048ba23858d222213b7c278aabede763'
-    'actions/attest@a1948c3f048ba23858d222213b7c278aabede763':
-        ref: 'v4.1.1'
-        commit: 'sha1-a1948c3f048ba23858d222213b7c278aabede763'
+            - 'actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d'
+    'actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d':
+        ref: 'v4.2.1'
+        commit: 'sha1-508db95dd578ae2727ebd6217d5ba78e4fbda05d'
         owner_id: 44036562
         repo_id: 760701061
     'actions/cache@v6.1.0':
@@ -167,14 +167,14 @@ dependencies:
         commit: 'sha1-4cda84d5c5c54efe2404f9d843567869ab1699d4'
         owner_id: 1940490
         repo_id: 260749683
-    'github/codeql-action@v4.37.3':
-        ref: 'v4.37.3'
-        commit: 'sha1-e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81'
+    'github/codeql-action@v4.37.6':
+        ref: 'v4.37.6'
+        commit: 'sha1-5595ccaf912efad79be6eef63a5619ff05969be3'
         owner_id: 9919
         repo_id: 259445878
-    'haskell-actions/setup@v2.11.0':
-        ref: 'v2.11.0'
-        commit: 'sha1-cd0d9bdd65b20557f41bea4dbe43d0b5fbbfe553'
+    'haskell-actions/setup@v2.12.0':
+        ref: 'v2.12.0'
+        commit: 'sha1-6037f33647c3f17758a2356c80fc4a53d7e0685d'
         owner_id: 75048950
         repo_id: 623796603
     'hyperpolymath/oikosbot@v0.1.1':
