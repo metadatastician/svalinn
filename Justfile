@@ -32,6 +32,7 @@ build:
 # run by this recipe. See tests/spec-mirror/README.md.
 test:
     deno test --allow-read --allow-env tests/schema/
+    deno test --allow-all tests/mvp/
 
 # Run the spec mirrors: executable specification, NOT coverage. These import
 # zero lines of svalinn -- a pass here says the mirror agrees with itself.
