@@ -40,7 +40,7 @@ workflows:
     '.github/workflows/mirror.yml': []
     '.github/workflows/oikosbot.yml':
         - 'actions/checkout@v7.0.1'
-        - 'github/codeql-action@v4.37.6'
+        - 'github/codeql-action@v4.37.7'
         - 'hyperpolymath/oikosbot@v0.1.1'
     '.github/workflows/publish-image.yml':
         - 'actions/attest-build-provenance@v4.2.2'
@@ -48,7 +48,7 @@ workflows:
         - 'docker/build-push-action@v7.3.0'
         - 'docker/login-action@v4.6.0'
         - 'docker/metadata-action@v6.2.0'
-        - 'docker/setup-buildx-action@v4.2.0'
+        - 'docker/setup-buildx-action@v4.3.0'
     '.github/workflows/push-email-notify.yml':
         - 'dawidd6/action-send-mail@v3.12.0'
     '.github/workflows/release.yml':
@@ -129,7 +129,7 @@ dependencies:
             - 'actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f'
     'dawidd6/action-send-mail@v3.12.0':
         ref: 'v3.12.0'
-        commit: 'sha1-2e600f3776677e493bf0da7aaec39a586d19a5ed'
+        commit: 'sha1-94de994a9f6fffee200243214e17002e2920bb59'
         owner_id: 9713907
         repo_id: 222439721
     'denoland/setup-deno@v2.0.5':
@@ -157,9 +157,9 @@ dependencies:
         commit: 'sha1-dc802804100637a589fabce1cb79ff13a1411302'
         owner_id: 5429470
         repo_id: 306769011
-    'docker/setup-buildx-action@v4.2.0':
-        ref: 'v4.2.0'
-        commit: 'sha1-bb05f3f5519dd87d3ba754cc423b652a5edd6d2c'
+    'docker/setup-buildx-action@v4.3.0':
+        ref: 'v4.3.0'
+        commit: 'sha1-37fe631027851001ddb9b187196cc803df7f5f0e'
         owner_id: 5429470
         repo_id: 288485773
     'dtolnay/rust-toolchain@stable':
@@ -167,9 +167,9 @@ dependencies:
         commit: 'sha1-4cda84d5c5c54efe2404f9d843567869ab1699d4'
         owner_id: 1940490
         repo_id: 260749683
-    'github/codeql-action@v4.37.6':
-        ref: 'v4.37.6'
-        commit: 'sha1-5595ccaf912efad79be6eef63a5619ff05969be3'
+    'github/codeql-action@v4.37.7':
+        ref: 'v4.37.7'
+        commit: 'sha1-ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd'
         owner_id: 9919
         repo_id: 259445878
     'haskell-actions/setup@v2.12.0':
