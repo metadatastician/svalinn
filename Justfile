@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
-// Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+# Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # Justfile - Svalinn edge shield build orchestration
 
 import? "contractile.just"
@@ -23,9 +23,20 @@ build-res:
 build:
     cd src && deno compile --allow-net --allow-read --allow-env -o ../dist/svalinn main.ts
 
-# Run tests (ReScript compiled to .res.mjs — needs node_modules for @rescript/core resolution)
+# Run the tests that execute real svalinn code.
+# Previously this pointed at tests/AuthTest.res.mjs and
+# tests/PolicyEvaluatorTest.res.mjs -- two files that do not exist anywhere in
+# the repo, so `just test` could not run at all. It also would not have
+# mattered if it had: every other suite here reimplements svalinn inline and
+# tests the reimplementation. Those now live in tests/spec-mirror/ and are NOT
+# run by this recipe. See tests/spec-mirror/README.md.
 test:
-    cd src && deno test --no-check --allow-all --node-modules-dir=auto tests/AuthTest.res.mjs tests/PolicyEvaluatorTest.res.mjs
+    deno test --allow-read --allow-env tests/schema/
+
+# Run the spec mirrors: executable specification, NOT coverage. These import
+# zero lines of svalinn -- a pass here says the mirror agrees with itself.
+test-spec-mirror:
+    deno test --allow-all tests/spec-mirror/
 
 # Type check
 check:
