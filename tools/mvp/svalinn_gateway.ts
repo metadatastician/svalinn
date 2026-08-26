@@ -634,6 +634,38 @@ function asStringArray(value: unknown, where: string): string[] {
   return value as string[];
 }
 
+/** Read the policy file. null = no default file present (not adopted here). */
+function readPolicyText(path: string, explicit: string | undefined): string | null {
+  try {
+    return Deno.readTextFileSync(path);
+  } catch (err) {
+    // An EXPLICITLY named file that cannot be read is an error; a missing
+    // DEFAULT file just means "not adopted here".
+    if (explicit && explicit.trim().length > 0) {
+      fail(`svalinn: cannot read ${path}: ${(err as Error).message}`);
+    }
+    return null;
+  }
+}
+
+/** Parse the policy and reject unknown top-level keys. */
+function parsePolicyDoc(text: string, path: string): Record<string, unknown> {
+  let doc: Record<string, unknown>;
+  try {
+    doc = (parseYaml(text) ?? {}) as Record<string, unknown>;
+  } catch (err) {
+    fail(`svalinn: ${path} is not valid YAML: ${(err as Error).message}`);
+  }
+  for (const key of Object.keys(doc)) {
+    if (!GATE_TABLES.includes(key)) {
+      fail(
+        `svalinn: ${path} has unknown top-level key "${key}". Known: ${GATE_TABLES.join(", ")}`,
+      );
+    }
+  }
+  return doc;
+}
+
 /**
  * Load .gatekeeper.yaml, or null when there is none.
  *
@@ -646,32 +678,9 @@ export function loadGateConfig(): GateConfig | null {
     ? explicit
     : ".gatekeeper.yaml";
 
-  let text: string;
-  try {
-    text = Deno.readTextFileSync(path);
-  } catch (err) {
-    // An EXPLICITLY named file that cannot be read is an error; a missing
-    // default file just means "not adopted here".
-    if (explicit && explicit.trim().length > 0) {
-      fail(`svalinn: cannot read ${path}: ${(err as Error).message}`);
-    }
-    return null;
-  }
-
-  let doc: Record<string, unknown>;
-  try {
-    doc = (parseYaml(text) ?? {}) as Record<string, unknown>;
-  } catch (err) {
-    fail(`svalinn: ${path} is not valid YAML: ${(err as Error).message}`);
-  }
-
-  for (const key of Object.keys(doc)) {
-    if (!GATE_TABLES.includes(key)) {
-      fail(
-        `svalinn: ${path} has unknown top-level key "${key}". Known: ${GATE_TABLES.join(", ")}`,
-      );
-    }
-  }
+  const text = readPolicyText(path, explicit);
+  if (text === null) return null;
+  const doc = parsePolicyDoc(text, path);
 
   const auth = (doc.auth ?? {}) as Record<string, unknown>;
   const limits = (doc.rate_limits ?? {}) as Record<string, unknown>;
