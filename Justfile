@@ -21,7 +21,8 @@ build-res:
 
 # Build compiled binary
 build:
-    cd src && deno compile --allow-net --allow-read --allow-env -o ../dist/svalinn main.ts
+    mkdir -p dist
+    deno compile --allow-net --allow-read --allow-env -o dist/svalinn tools/mvp/svalinn_gateway.ts
 
 # Run the tests that execute real svalinn code.
 # Previously this pointed at tests/AuthTest.res.mjs and
@@ -41,7 +42,7 @@ test-spec-mirror:
 
 # Type check
 check:
-    cd src && deno check main.ts
+    deno check tools/mvp/svalinn_gateway.ts
 
 # Format code
 fmt:
