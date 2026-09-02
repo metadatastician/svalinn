@@ -42,7 +42,7 @@ workflows:
     '.github/workflows/mirror.yml': []
     '.github/workflows/oikosbot.yml':
         - 'actions/checkout@v7.0.1'
-        - 'github/codeql-action@v4.37.7'
+        - 'github/codeql-action@v4.37.9'
         - 'hyperpolymath/oikosbot@v0.1.1'
     '.github/workflows/publish-image.yml':
         - 'actions/attest-build-provenance@v4.2.2'
@@ -169,9 +169,9 @@ dependencies:
         commit: 'sha1-4cda84d5c5c54efe2404f9d843567869ab1699d4'
         owner_id: 1940490
         repo_id: 260749683
-    'github/codeql-action@v4.37.7':
-        ref: 'v4.37.7'
-        commit: 'sha1-ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd'
+    'github/codeql-action@v4.37.9':
+        ref: 'v4.37.9'
+        commit: 'sha1-cdf488f595d80d6e07e03d4674febd5ab45fa938'
         owner_id: 9919
         repo_id: 259445878
     'haskell-actions/setup@v2.12.0':
