@@ -29,7 +29,7 @@
 - The README marks Edge Gateway, Vordr Integration, Policy Engine, Authentication and svalinn-compose all 'Complete'. All five are false.
 - `EVALUATION-REPORT.adoc` mandates 'A rating without evidence is invalid' — and `evidence/` contains only `.gitkeep`. Its 'Onboarding: Strong' rating cites `vordr/src/cli/doctor.rs`, a file in a DIFFERENT repository.
 - `PROOF-NEEDS.md` states 'Languages: ReScript' and cites `src/abi/*.idr` and '20+ Obj.magic calls'. Reality: 0 `.res`, 0 `.idr`, no `src/abi/`.
-- Four workflows filter on `paths: ['vordr/**']` — **`svalinn/vordr/` does not exist**, so they can never trigger.
+- Three workflows filtered on `paths: ['vordr/**']` — **`svalinn/vordr/` does not exist**: it was extracted to its own repository in `d888be9` on 2025-12-30, *the same day all three were written*. They never once succeeded (0 of 16 runs, all-time) and were DELETED 2026-09-04 (PR #43). RESIDUE: `release.yml` and `surface-contract-lint.yml` still reference the extracted path.
 - `ecosystem.yaml` lists only 3 of the 6 repos (omits stapeln, selur, rokur); quickstart paths point at `~/Documents/hyperpolymath-repos/`, which does not exist; line 2 is a `//` C++ comment in a YAML file.
 - `svalinn-compose` is `ComposeOrchestrator.affine` — 132 uncompilable lines, competing with selur's 6,503-line working compose CLI.
 
@@ -44,7 +44,7 @@
 1. RULING NEEDED (R2): run the AffineScript compiler against src/ and decide promote-MVP vs finish-port
 2. Make the test suites import the code they claim to test
 3. Correct the README status table — five 'Complete' entries are false
-4. Delete or repoint the four workflows filtering on the nonexistent vordr/** path
+4. ~~Delete or repoint the workflows filtering on the nonexistent vordr/** path~~ — **DONE 2026-09-04 (PR #43)**: `doctor-smoke.yml`, `e2e-readme.yml`, `conformance-consumer.yml` deleted. RESIDUE, not yet fixed: `release.yml` builds vordr binaries with `working-directory: vordr` and has **0 runs ever** — it will fail on the first `v*` tag; `surface-contract-lint.yml` still lists 2 dead `vordr/src/cli/` patterns.
 5. Rewrite ecosystem.yaml to cover all six repos, or delete it
 6. Populate evidence/ or stop citing it in EVALUATION-REPORT.adoc
 
@@ -62,10 +62,9 @@ ecosystem sitrep for the taxonomy.)
 **Gates that run but cannot fail (or check nothing):**
 
 - `codeql.yml` pinned to `language: actions` — zero application source analysed
-- `e2e-readme.yml` — six of six `vordr` invocations are `|| true`
-- `conformance-consumer.yml` — the conformance suite cannot fail conformance (`|| true`)
-- `surface-contract-lint.yml` — every finding is `::warning::` only
-- 4 workflows filter on `paths: ['vordr/**']`; **`svalinn/vordr/` does not exist**, so they can never trigger
+- `surface-contract-lint.yml` — triple-vacuous, MEASURED 2026-09-04: (a) every finding is `::warning::` only, 0 occurrences of `exit 1`/`::error`, so the job cannot exit non-zero; (b) 2 of its 4 surface patterns point at the extracted `vordr/src/cli/`; (c) the patterns are **globs handed to `grep` as regexes** — `grep -q 'spec/schemas/*.json'` does NOT match `spec/schemas/compose.v1.json`, so even the live schema pattern never fires. Its 67-of-78 green record measures nothing.
+- `release.yml` — builds `vordr` binaries (`working-directory: vordr`) from a subtree that left in `d888be9`; **0 runs ever**, so the breakage is latent until the first `v*` tag
+- ~~4 workflows filter on `paths: ['vordr/**']`~~ — the three that did were deleted 2026-09-04 (PR #43); see the residue note above
 
 > A gate is not done until it has been observed to **fail** on a deliberate defect.
 > Every fake gate listed above passed its own review.
