@@ -17,22 +17,8 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/upload-artifact@v7.0.1'
         - 'denoland/setup-deno@v2.0.5'
-    '.github/workflows/conformance-consumer.yml':
-        - 'actions/cache@v6.1.0'
-        - 'actions/checkout@v7.0.1'
-        - 'actions/upload-artifact@v7.0.1'
-        - 'dtolnay/rust-toolchain@stable'
     '.github/workflows/dependabot-automerge.yml':
         - 'dependabot/fetch-metadata@v3.1.0'
-    '.github/workflows/doctor-smoke.yml':
-        - 'actions/cache@v6.1.0'
-        - 'actions/checkout@v7.0.1'
-        - 'actions/upload-artifact@v7.0.1'
-        - 'dtolnay/rust-toolchain@stable'
-    '.github/workflows/e2e-readme.yml':
-        - 'actions/cache@v6.1.0'
-        - 'actions/checkout@v7.0.1'
-        - 'dtolnay/rust-toolchain@stable'
     '.github/workflows/governance.yml': []
     '.github/workflows/hypatia-scan.yml': []
     '.github/workflows/instant-sync.yml':
