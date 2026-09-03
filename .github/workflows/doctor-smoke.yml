@@ -3,6 +3,9 @@
 # This workflow is managed by gh actions-lock.
 name: Doctor Smoke Test
 on:
+  # Manual trigger: these workflows are path-filtered on vordr/** and their own
+  # file, so an actions.lock repair cannot be verified without one.
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
