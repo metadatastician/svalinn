@@ -35,8 +35,20 @@ jobs:
             echo "Checking: $schema"
             # Validate the schema is valid JSON
             jq . "$schema" > /dev/null || exit 1
+            # Pick the AJV dialect from the schema's OWN $schema keyword.
+            # AJV ships one dialect per build and registers only that dialect's
+            # meta-schema, so the wrong --spec makes a VALID schema report
+            # 'no schema with key or ref ...' — a false red. There is no single
+            # --spec value that covers a mixed-dialect directory.
+            case "$(jq -r '."$schema" // ""' "$schema")" in
+              *2020-12*)  spec=draft2020 ;;
+              *2019-09*)  spec=draft2019 ;;
+              *draft-07*) spec=draft7 ;;
+              *) echo "::error file=$schema::declares no recognised \$schema dialect (expected draft-07, 2019-09 or 2020-12)"; exit 1 ;;
+            esac
+            echo "  dialect: $spec"
             # Validate it's a valid JSON Schema
-            ajv compile -s "$schema" --strict=false -c ajv-formats || exit 1
+            ajv compile --spec="$spec" -s "$schema" --strict=false -c ajv-formats || exit 1
           done
           echo "All schemas valid!"
       - name: Check schema versioning
