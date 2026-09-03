@@ -593,14 +593,206 @@ async function initPreflight() {
 }
 
 await loadState();
+import { parse as parseYaml } from "@std/yaml";
+
+// ---------------------------------------------------------------------------
+// .gatekeeper.yaml — the bundle's policy file for svalinn
+//
+// ABSENT IS THE NORMAL CASE. No .gatekeeper.yaml is committed to this repo, so
+// with no file the gateway behaves exactly as it always has: env-only, every
+// route open. Adopting the file is opt-in and additive.
+//
+// PRESENT-BUT-WRONG IS FATAL. A malformed or unrecognised policy exits(1)
+// rather than starting. svalinn is the edge shield; running it on a policy we
+// could not fully parse would mean guarding with rules nobody verified.
+// ---------------------------------------------------------------------------
+
+type GateConfig = {
+  publicPaths: string[];
+  authenticatedPaths: string[];
+  tokenEnv: string;
+  rateWindowMs: number;
+  rateMax: number;
+};
+
+const GATE_TABLES = ["version", "auth", "rate_limits"];
+
+function fail(message: string): never {
+  console.error(JSON.stringify({
+    level: "FATAL",
+    message,
+    service: "svalinn",
+  }));
+  Deno.exit(1);
+}
+
+function asStringArray(value: unknown, where: string): string[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.some((v) => typeof v !== "string")) {
+    fail(`svalinn: ${where} must be a list of strings`);
+  }
+  return value as string[];
+}
+
+/** Read the policy file. null = no default file present (not adopted here). */
+function readPolicyText(path: string, explicit: string | undefined): string | null {
+  try {
+    return Deno.readTextFileSync(path);
+  } catch (err) {
+    // An EXPLICITLY named file that cannot be read is an error; a missing
+    // DEFAULT file just means "not adopted here".
+    if (explicit && explicit.trim().length > 0) {
+      fail(`svalinn: cannot read ${path}: ${(err as Error).message}`);
+    }
+    return null;
+  }
+}
+
+/** Parse the policy and reject unknown top-level keys. */
+function parsePolicyDoc(text: string, path: string): Record<string, unknown> {
+  let doc: Record<string, unknown>;
+  try {
+    doc = (parseYaml(text) ?? {}) as Record<string, unknown>;
+  } catch (err) {
+    fail(`svalinn: ${path} is not valid YAML: ${(err as Error).message}`);
+  }
+  for (const key of Object.keys(doc)) {
+    if (!GATE_TABLES.includes(key)) {
+      fail(
+        `svalinn: ${path} has unknown top-level key "${key}". Known: ${GATE_TABLES.join(", ")}`,
+      );
+    }
+  }
+  return doc;
+}
+
+/**
+ * Load .gatekeeper.yaml, or null when there is none.
+ *
+ * Path comes from SVALINN_GATEKEEPER_CONFIG, else ".gatekeeper.yaml" in cwd.
+ * Returns null ONLY when no file is present. Every other problem exits(1).
+ */
+export function loadGateConfig(): GateConfig | null {
+  const explicit = Deno.env.get("SVALINN_GATEKEEPER_CONFIG");
+  const path = explicit && explicit.trim().length > 0
+    ? explicit
+    : ".gatekeeper.yaml";
+
+  const text = readPolicyText(path, explicit);
+  if (text === null) return null;
+  const doc = parsePolicyDoc(text, path);
+
+  const auth = (doc.auth ?? {}) as Record<string, unknown>;
+  const limits = (doc.rate_limits ?? {}) as Record<string, unknown>;
+
+  const publicPaths = asStringArray(auth.public, `${path} auth.public`);
+  const authenticatedPaths = asStringArray(
+    auth.authenticated,
+    `${path} auth.authenticated`,
+  );
+  if (publicPaths.length === 0 && authenticatedPaths.length === 0) {
+    fail(
+      `svalinn: ${path} lists no paths at all. With default-deny that would ` +
+        `reject every request, which is never what a policy file means to say.`,
+    );
+  }
+
+  const tokenEnv = typeof auth.token_env === "string" && auth.token_env.length > 0
+    ? auth.token_env
+    : "SVALINN_API_TOKEN";
+
+  const rateWindowMs = typeof limits.window_ms === "number" ? limits.window_ms : 60_000;
+  const rateMax = typeof limits.max === "number" ? limits.max : 0;
+
+  return { publicPaths, authenticatedPaths, tokenEnv, rateWindowMs, rateMax };
+}
+
+/** Glob match supporting a single trailing `*`, e.g. "/v1/*". */
+function pathMatches(pattern: string, pathname: string): boolean {
+  if (pattern.endsWith("/*")) return pathname.startsWith(pattern.slice(0, -1));
+  if (pattern.endsWith("*")) return pathname.startsWith(pattern.slice(0, -1));
+  return pattern === pathname;
+}
+
+const rateBuckets = new Map<string, { count: number; resetAt: number }>();
+
+/** Fixed-window per-client limiter. Returns true when the caller is over. */
+function rateLimited(key: string, windowMs: number, max: number): boolean {
+  if (max <= 0) return false;
+  const now = Date.now();
+  const bucket = rateBuckets.get(key);
+  if (!bucket || now >= bucket.resetAt) {
+    rateBuckets.set(key, { count: 1, resetAt: now + windowMs });
+    return false;
+  }
+  bucket.count += 1;
+  return bucket.count > max;
+}
+
+/**
+ * Apply the policy to a request. Returns a Response to send instead of
+ * handling it, or null to continue.
+ *
+ * DEFAULT-DENY: a path matching neither list is refused. That is the whole
+ * point of a gate -- an unlisted route is one nobody decided about, and
+ * guessing "probably fine" is how edge shields leak.
+ */
+function applyGatePolicy(
+  cfg: GateConfig | null,
+  req: Request,
+  url: URL,
+  clientKey: string,
+): Response | null {
+  if (!cfg) return null;
+
+  if (rateLimited(clientKey, cfg.rateWindowMs, cfg.rateMax)) {
+    return jsonResponse(429, { error: "rate limit exceeded" });
+  }
+
+  if (cfg.publicPaths.some((p) => pathMatches(p, url.pathname))) return null;
+
+  if (cfg.authenticatedPaths.some((p) => pathMatches(p, url.pathname))) {
+    const expected = Deno.env.get(cfg.tokenEnv) ?? "";
+    if (expected.length === 0) {
+      // The policy demands auth on this route and no token is configured, so
+      // the requirement cannot be enforced. Refuse rather than wave it through.
+      return jsonResponse(503, {
+        error: `authentication required but ${cfg.tokenEnv} is not set`,
+      });
+    }
+    const header = req.headers.get("authorization") ?? "";
+    if (header !== `Bearer ${expected}`) {
+      return jsonResponse(401, { error: "unauthorized" });
+    }
+    return null;
+  }
+
+  return jsonResponse(403, { error: "path not permitted by gatekeeper policy" });
+}
+
 await initPreflight();
+
+const gateConfig = loadGateConfig();
+if (gateConfig) {
+  logEvent("info", "gatekeeper policy loaded", {
+    publicPaths: gateConfig.publicPaths.length,
+    authenticatedPaths: gateConfig.authenticatedPaths.length,
+    rateMax: gateConfig.rateMax,
+  });
+}
 
 const listenPort = Number(Deno.env.get("SVALINN_PORT") ?? "8000");
 const listenHost = Deno.env.get("SVALINN_HOST") ?? "0.0.0.0";
 logEvent("info", "listening", { hostname: listenHost, port: listenPort });
 
-Deno.serve({ port: listenPort, hostname: listenHost }, async (req) => {
+Deno.serve({ port: listenPort, hostname: listenHost }, async (req, info) => {
   const url = new URL(req.url);
+
+  //  Policy first: nothing below runs for a request the gate refuses.
+  const clientKey =
+    (info?.remoteAddr as Deno.NetAddr | undefined)?.hostname ?? "unknown";
+  const refusal = applyGatePolicy(gateConfig, req, url, clientKey);
+  if (refusal) return refusal;
   if (req.method === "GET" && (url.pathname === "/healthz" || url.pathname === "/health")) {
     const strict = url.searchParams.get("strict") === "1";
     if (strict) {

@@ -32,10 +32,11 @@ jobs:
           mode: report
           path: .
           output: results.sarif
+          image: ghcr.io/hyperpolymath/oikos@sha256:aa2b409a313f9e1c67cb1d56cabc5ef087af0da39ab2767fefd196f383ed1888
 
       - name: Upload SARIF to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@v4.37.7
+        uses: github/codeql-action/upload-sarif@v4.37.9
         with:
           sarif_file: results.sarif
           category: oikosbot

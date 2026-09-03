@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MPL-2.0
+#
+# .gatekeeper.yaml — svalinn's edge policy. OPTIONAL.
+#
+# With no file present svalinn runs exactly as before: env-only, every route
+# open. Adopting this file is opt-in and additive.
+#
+# STRICT: an unknown top-level key, malformed YAML, or a policy listing no
+# paths at all makes svalinn exit(1) rather than start. It is the edge shield;
+# guarding with rules nobody could parse is worse than not guarding.
+#
+# Point at it with SVALINN_GATEKEEPER_CONFIG, or drop it in the working
+# directory as .gatekeeper.yaml.
+
+version: "1.0"
+
+auth:
+  # No authentication. Health endpoints must always be public -- an operator
+  # or orchestrator has to be able to ask "are you alive?" without a token.
+  public:
+    - /healthz
+    - /health
+
+  # Bearer token required. Supports one trailing "*" as a prefix wildcard.
+  authenticated:
+    - /v1/*
+    - /verify
+    - /run
+
+  # Which env var holds the expected bearer token.
+  # If the policy demands auth here and this var is UNSET, svalinn answers 503
+  # rather than allowing the request: an unenforceable requirement is not a
+  # reason to stop requiring it.
+  token_env: SVALINN_API_TOKEN
+
+rate_limits:
+  window_ms: 60000
+  max: 500          # 0 or omitted disables rate limiting
+
+# ANY PATH MATCHING NEITHER LIST IS REFUSED WITH 403. That is deliberate:
+# an unlisted route is one nobody decided about, and "probably fine" is how
+# edge shields leak.
