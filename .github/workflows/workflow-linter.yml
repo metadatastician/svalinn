@@ -20,14 +20,40 @@ jobs:
 
       - name: Check SPDX headers
         run: |
+          # SPDX must appear in the LEADING COMMENT BLOCK -- the run of '#' lines
+          # at the top of the file -- NOT strictly on line 1. The old test was
+          # `head -1 | grep SPDX`, which is unsatisfiable in this estate: every
+          # `gh actions-lock` run PREPENDS its own banner above line 1, so 16 of
+          # 19 workflows failed a licence gate they all actually satisfied.
+          # The gate still fails when SPDX is absent, which the control below proves.
+          spdx_in_header() {
+            # Matches the estate implementation in standards
+            # governance-reusable.yml: tolerate a YAML document marker, and
+            # anchor to the comment form so a prose mention of the string
+            # cannot satisfy the gate.
+            awk '/^---[[:space:]]*$/ { next } /^#/ { print; next } { exit }' "$1" \
+              | grep -q "^# SPDX-License-Identifier:"
+          }
+
+          # POSITIVE CONTROL: a headerless fixture MUST trip the check. If this
+          # stops firing the gate has gone vacuous and says so, loudly.
+          ctl="$(mktemp -d)/headerless.yml"
+          printf 'name: no-licence-here\non: push\n' > "$ctl"
+          if spdx_in_header "$ctl"; then
+            echo "::error::SPDX check is VACUOUS -- it passed a file with no SPDX header."
+            exit 1
+          fi
+          echo "Control OK: headerless fixture correctly rejected."
+
           errors=0
           for f in .github/workflows/*.yml .github/workflows/*.yaml; do
             [ -f "$f" ] || continue
-            if ! head -1 "$f" | grep -q "SPDX-License-Identifier"; then
-              echo "ERROR: $f missing SPDX header"
+            if ! spdx_in_header "$f"; then
+              echo "ERROR: $f has no SPDX-License-Identifier in its header comment block"
               errors=$((errors + 1))
             fi
           done
+          echo "Checked $(ls .github/workflows/*.yml .github/workflows/*.yaml 2>/dev/null | wc -l) workflow file(s); $errors missing SPDX."
           exit $errors
       - name: Check permissions declaration
         run: |
