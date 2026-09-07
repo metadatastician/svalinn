@@ -3,7 +3,7 @@
 # This workflow is managed by gh actions-lock.
 #
 # Publish the svalinn gateway image to GHCR so the
-# ghcr.io/hyperpolymath/svalinn package links back to this repo via the
+# ghcr.io/<repository_owner>/svalinn package links back to this repo via the
 # org.opencontainers.image.source label injected by metadata-action.
 name: Publish Image
 on:
@@ -42,7 +42,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6.2.0
         with:
-          images: ghcr.io/hyperpolymath/svalinn
+          images: ghcr.io/${{ github.repository_owner }}/svalinn
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha
@@ -60,6 +60,6 @@ jobs:
       - name: Attest container provenance
         uses: actions/attest-build-provenance@v4.2.2
         with:
-          subject-name: ghcr.io/hyperpolymath/svalinn
+          subject-name: ghcr.io/${{ github.repository_owner }}/svalinn
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
