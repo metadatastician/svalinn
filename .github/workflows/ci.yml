@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main]
 permissions:
-  actions: read
+  actions: read # NOSONAR — job-level would remove the flush-left permissions: required by workflow-linter.yml's "Check permissions declaration" gate (measured: that loop exits 1)
   contents: read
 jobs:
   lint:
@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@v2.0.5
+        uses: denoland/setup-deno@v2.0.5 # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-22d081ff2d3a40755e97629de92e3bcbfa7cf2ed)
         with:
           deno-version: v2.x
       - name: Cache Deno dependencies
@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@v2.0.5
+        uses: denoland/setup-deno@v2.0.5 # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-22d081ff2d3a40755e97629de92e3bcbfa7cf2ed)
         with:
           deno-version: v2.x
       - name: Check formatting
@@ -59,7 +59,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@v2.0.5
+        uses: denoland/setup-deno@v2.0.5 # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-22d081ff2d3a40755e97629de92e3bcbfa7cf2ed)
         with:
           deno-version: v2.x
       - name: Cache Deno dependencies
@@ -85,7 +85,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@v2.0.5
+        uses: denoland/setup-deno@v2.0.5 # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-22d081ff2d3a40755e97629de92e3bcbfa7cf2ed)
         with:
           deno-version: v2.x
       - name: Cache Deno dependencies
@@ -120,7 +120,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@v2.0.5
+        uses: denoland/setup-deno@v2.0.5 # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-22d081ff2d3a40755e97629de92e3bcbfa7cf2ed)
         with:
           deno-version: v2.x
       - name: Cache Deno dependencies
@@ -144,7 +144,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@v2.0.5
+        uses: denoland/setup-deno@v2.0.5 # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-22d081ff2d3a40755e97629de92e3bcbfa7cf2ed)
         with:
           deno-version: v2.x
       - name: Cache Deno dependencies

@@ -34,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@stable # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-6bed0761d98439e5a578e2877258200ad565ba87)
         with:
           toolchain: stable
           targets: ${{ matrix.target }}
@@ -76,7 +76,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@stable # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-6bed0761d98439e5a578e2877258200ad565ba87)
         with:
           toolchain: stable
       - name: Install cargo-sbom
@@ -180,7 +180,7 @@ jobs:
         with:
           subject-path: 'release/*'
       - name: Create Release
-        uses: softprops/action-gh-release@v3.0.3
+        uses: softprops/action-gh-release@v3.0.3 # NOSONAR — pin authority is .github/workflows/actions.lock (sha1-efb35369e0ad2afab669f228072c1b0d510eae64)
         with:
           files: release/*
           generate_release_notes: true
@@ -208,5 +208,5 @@ jobs:
 
             See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
 permissions:
-  actions: read
+  actions: read # NOSONAR — job-level would remove the flush-left permissions: required by workflow-linter.yml's "Check permissions declaration" gate (measured: that loop exits 1)
   contents: read
