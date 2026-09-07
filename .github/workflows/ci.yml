@@ -97,11 +97,22 @@ jobs:
           key: ${{ runner.os }}-deno-${{ hashFiles('**/deno.json', '**/deno.lock') }}
           restore-keys: |
             ${{ runner.os }}-deno-
-      - name: Run tests
-        run: deno test --allow-net --allow-read --allow-env
-        working-directory: src
-  extended-tests:
-    name: Extended Tests (E2E / Property / Schema)
+      # These two steps mirror the `test` recipe in the Justfile, which is the
+      # single source of truth for what "the tests" means in this repo. Both
+      # run from the repository root: tests/mvp/ spawns
+      # tools/mvp/svalinn_gateway.ts as a subprocess and resolves imports
+      # through the root deno.json import map, so it needs --allow-all.
+      - name: Run schema tests
+        run: deno test --allow-read --allow-env tests/schema/
+      - name: Run MVP tests
+        run: deno test --allow-all tests/mvp/
+  spec-mirror:
+    # Renamed from `extended-tests`. It targeted tests/e2e/ and tests/property/,
+    # which do not exist -- those suites were moved to tests/spec-mirror/. Per
+    # tests/spec-mirror/README.md they import zero lines of svalinn, so a pass
+    # here is agreement of the mirror with itself, NOT coverage. The name says
+    # so. Mirrors the `test-spec-mirror` recipe in the Justfile.
+    name: Spec mirrors (not evidence)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -118,20 +129,16 @@ jobs:
           path: |
             ~/.cache/deno
             ~/.deno
-          key: ${{ runner.os }}-deno-ext-${{ hashFiles('**/deno.json', '**/deno.lock') }}
+          key: ${{ runner.os }}-deno-spec-${{ hashFiles('**/deno.json', '**/deno.lock') }}
           restore-keys: |
-            ${{ runner.os }}-deno-ext-
-      - name: Run E2E tests
-        run: deno test --allow-net --allow-read --allow-env tests/e2e/
-      - name: Run property tests
-        run: deno test --allow-net --allow-read --allow-env tests/property/
-      - name: Run schema tests
-        run: deno test --allow-net --allow-read --allow-env tests/schema/
+            ${{ runner.os }}-deno-spec-
+      - name: Run spec mirrors
+        run: deno test --allow-all tests/spec-mirror/
   build:
     name: Build Binaries
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [lint, format, typecheck, test, extended-tests]
+    needs: [lint, format, typecheck, test, spec-mirror]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
