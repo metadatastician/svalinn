@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: MPL-2.0
+# Owner ruling O-CODEQL (2026-09-03): pin authority on this repo is
+# .github/workflows/actions.lock, so `actions/unpinned-tag` is a false
+# signal here. Keep the extended suite (parity with the former default
+# setup) minus that one rule. Never rewrite `uses:` lines to inline SHAs.
+name: "svalinn CodeQL (extended minus actions/unpinned-tag)"
+queries:
+  - uses: security-extended
+query-filters:
+  - exclude:
+      id: actions/unpinned-tag
