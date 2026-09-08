@@ -22,9 +22,17 @@ jobs:
         env:
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
-          git fetch --no-tags --depth=1 origin main
-          git rev-parse --verify --quiet FETCH_HEAD > /dev/null
-          git update-ref refs/remotes/origin/main "$(git rev-parse FETCH_HEAD)"
+          # `tee` is the LAST command in the pipeline below, so without pipefail
+          # the step would report tee's exit 0 and swallow a real failure --
+          # the precise fake-green this workflow exists to remove.
+          set -o pipefail
+          # `fetch-depth: 0` above already provides a full-history origin/main.
+          # Fetch ONLY if it is absent, and NEVER with --depth: a shallow fetch
+          # writes .git/shallow, after which `origin/main...HEAD` has no merge
+          # base, the file list comes back empty, and the empty-operand guard
+          # below would fail an innocent PR. Verified locally, 2026-09-08.
+          git rev-parse --verify --quiet origin/main > /dev/null \
+            || git fetch --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
           ./.github/scripts/surface-contract-lint.sh | tee surface-contract.log
       - name: Report
         if: always()
