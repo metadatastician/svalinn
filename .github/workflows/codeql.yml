@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: MPL-2.0
+# This workflow is managed by gh actions-lock.
+#
+# ADVANCED CodeQL configuration (owner ruling O-CODEQL, 2026-09-03).
+# Replaces the repository's CodeQL *default setup*, which cannot carry a
+# query filter. The filter lives in .github/codeql/codeql-config.yml and
+# excludes `actions/unpinned-tag`: pin authority on this repo is
+# .github/workflows/actions.lock, so `uses:` lines keep their @vX.Y.Z tags
+# on purpose and MUST NEVER be rewritten to inline SHAs.
+#
+# Query suite is `security-extended`, which is parity with the former
+# default setup's `extended` suite (measured 2026-09-08:
+# query_suite: extended). The schedule is monthly rather than the default
+# setup's weekly, per the Actions burn cut (standards#288).
+name: CodeQL Security Analysis
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 6 1 * *'   # monthly 1st 06:00 UTC (Actions burn cut, standards#288)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # `actions` matches the former default setup's language list
+          # (measured: languages: ["actions"]). Per hypatia rule
+          # `codeql_language_matrix_mismatch`.
+          - language: actions
+            build-mode: none
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4.37.9
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          config-file: ./.github/codeql/codeql-config.yml
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4.37.9
+        with:
+          category: "/language:${{ matrix.language }}"
