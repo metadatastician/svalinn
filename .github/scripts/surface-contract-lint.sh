@@ -24,7 +24,15 @@ SURFACE_PREFIXES=(
   "spec/schemas/"
 )
 
-fail() { echo "surface-contract: FAIL: $*" >&2; exit 1; }
+# Failures MUST reach stdout. The workflow pipes this script through `tee` into
+# the job summary, and `tee` copies stdout only -- a message written to stderr
+# reaches the step console but leaves the summary panel showing a log with no
+# FAIL line in it, i.e. a red job whose own report looks clean.
+fail() {
+  echo "::error::surface-contract: $*"
+  echo "surface-contract: FAIL: $*"
+  exit 1
+}
 
 # -- Positive control -------------------------------------------------------
 # A declared surface path that has been renamed or removed silently disarms the
@@ -77,9 +85,22 @@ printf '  %s\n' "${SURFACE_HITS[@]}"
 # -- Requirements that now apply --------------------------------------------
 VIOLATIONS=()
 
+# The entry counts only if it is one of the two files named in the message
+# below, at the repository ROOT, and still present after the change.
+# Two ways the earlier `case "${f##*/}" in CHANGELOG*)` accepted a non-entry:
+#   1. it matched a basename anywhere in the tree with any suffix, so
+#      `vendor/junk/CHANGELOG-nonsense.txt` satisfied a documentation rule;
+#   2. `git diff --name-only` lists DELETIONS, so removing CHANGELOG.md
+#      counted as recording something in it.
+# `-f` re-asks the question the consumer actually cares about: is there an
+# entry on disk now.
 changelog_touched=0
 for f in "${CHANGED[@]}"; do
-  case "${f##*/}" in CHANGELOG*) changelog_touched=1 ;; esac
+  case "$f" in
+    CHANGELOG.adoc|CHANGELOG.md)
+      if [ -f "$f" ]; then changelog_touched=1; fi
+      ;;
+  esac
 done
 [ "$changelog_touched" -eq 1 ] \
   || VIOLATIONS+=("no CHANGELOG entry: a surface change must be recorded in CHANGELOG.adoc or CHANGELOG.md")
@@ -90,7 +111,8 @@ case ",${PR_LABELS:-}," in
 esac
 
 if [ "${#VIOLATIONS[@]}" -gt 0 ]; then
-  printf 'surface-contract: FAIL: %s\n' "${VIOLATIONS[@]}" >&2
+  printf '::error::surface-contract: %s\n' "${VIOLATIONS[@]}"
+  printf 'surface-contract: FAIL: %s\n' "${VIOLATIONS[@]}"
   exit 1
 fi
 
