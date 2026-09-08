@@ -5,6 +5,8 @@ name: Surface Contract Lint
 on:
   pull_request:
     branches: [main]
+    # `labeled`/`unlabeled` are required: the label check hard-fails, so adding
+    # the `surface-change` label must be able to re-trigger this run.
     types: [opened, synchronize, reopened, labeled, unlabeled]
 jobs:
   surface-contract-lint:
@@ -16,71 +18,32 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
-      - name: Check for surface changes
-        id: surface-check
+      - name: Enforce surface contract
+        env:
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
-          # Define surface files
-          SURFACE_FILES=(
-            "vordr/src/cli/mod.rs"
-            "vordr/src/cli/*.rs"
-            "spec/schemas/*.json"
-            "docs/surface-contract.adoc"
-          )
-
-          # Get changed files
-          CHANGED=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)
-
-          # Check for surface file changes
-          SURFACE_CHANGED="false"
-          for pattern in "${SURFACE_FILES[@]}"; do
-            if echo "$CHANGED" | grep -q "$pattern"; then
-              SURFACE_CHANGED="true"
-              echo "Surface change detected: $pattern"
-            fi
-          done
-
-          echo "surface_changed=$SURFACE_CHANGED" >> $GITHUB_OUTPUT
-
-          # Check for CLI flag/command changes specifically
-          if echo "$CHANGED" | grep -q "vordr/src/cli/"; then
-            CLI_DIFF=$(git diff origin/main...HEAD -- vordr/src/cli/ 2>/dev/null || git diff HEAD~1 -- vordr/src/cli/)
-            if echo "$CLI_DIFF" | grep -qE '(#\[arg|#\[command|pub (struct|enum).*Args)'; then
-              echo "CLI interface changes detected!"
-              echo "cli_changed=true" >> $GITHUB_OUTPUT
-            fi
-          fi
-      - name: Check changelog entry
-        if: steps.surface-check.outputs.surface_changed == 'true'
+          # `tee` is the LAST command in the pipeline below, so without pipefail
+          # the step would report tee's exit 0 and swallow a real failure --
+          # the precise fake-green this workflow exists to remove.
+          set -o pipefail
+          # `fetch-depth: 0` above already provides a full-history origin/main.
+          # Fetch ONLY if it is absent, and NEVER with --depth: a shallow fetch
+          # writes .git/shallow, after which `origin/main...HEAD` has no merge
+          # base, the file list comes back empty, and the empty-operand guard
+          # below would fail an innocent PR. Verified locally, 2026-09-08.
+          git rev-parse --verify --quiet origin/main > /dev/null \
+            || git fetch --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
+          ./.github/scripts/surface-contract-lint.sh | tee surface-contract.log
+      - name: Report
+        if: always()
         run: |
-          # Check if CHANGELOG.md was updated
-          CHANGED=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)
-          if ! echo "$CHANGED" | grep -q "CHANGELOG"; then
-            echo "::warning::Surface change detected but no CHANGELOG entry found"
-            echo "Please add a changelog entry for surface changes."
-          fi
-      - name: Check surface-change label
-        if: steps.surface-check.outputs.surface_changed == 'true'
-        run: |
-          # Check if PR has surface-change label
-          LABELS="${{ join(github.event.pull_request.labels.*.name, ',') }}"
-          if [[ ! "$LABELS" == *"surface-change"* ]]; then
-            echo "::warning::Surface change detected but 'surface-change' label not present"
-            echo "Consider adding the 'surface-change' label to this PR."
-          fi
-      - name: Generate report
-        run: |
-          echo "## Surface Contract Check" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.surface-check.outputs.surface_changed }}" == "true" ]; then
-            echo ":warning: **Surface changes detected**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Please ensure:" >> $GITHUB_STEP_SUMMARY
-            echo "- [ ] CHANGELOG updated with migration notes" >> $GITHUB_STEP_SUMMARY
-            echo "- [ ] \`surface-change\` label added" >> $GITHUB_STEP_SUMMARY
-            echo "- [ ] docs/surface-contract.adoc reviewed" >> $GITHUB_STEP_SUMMARY
-          else
-            echo ":white_check_mark: No surface changes detected" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## Surface Contract Check"
+            echo ""
+            echo '```'
+            if [ -f surface-contract.log ]; then cat surface-contract.log; else echo "(the gate produced no log; see the step above)"; fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 permissions:
   actions: read
   contents: read

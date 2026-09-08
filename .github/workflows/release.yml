@@ -23,13 +23,13 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-22.04
-            artifact: vordr-linux-x86_64
+            artifact: svalinn-gate-linux-x86_64
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-22.04
-            artifact: vordr-linux-aarch64
+            artifact: svalinn-gate-linux-aarch64
           - target: x86_64-unknown-linux-musl
             os: ubuntu-22.04
-            artifact: vordr-linux-x86_64-musl
+            artifact: svalinn-gate-linux-x86_64-musl
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
@@ -49,13 +49,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
       - name: Build release binary
-        working-directory: vordr
+        working-directory: tools/mvp/svalinn-gate
         run: |
           cargo build --release --target ${{ matrix.target }}
       - name: Package binary
         run: |
           mkdir -p dist
-          cp vordr/target/${{ matrix.target }}/release/vordr dist/${{ matrix.artifact }}
+          cp tools/mvp/svalinn-gate/target/${{ matrix.target }}/release/svalinn-gate dist/${{ matrix.artifact }}
           chmod +x dist/${{ matrix.artifact }}
       - name: Generate checksums
         run: |
@@ -82,13 +82,13 @@ jobs:
       - name: Install cargo-sbom
         run: cargo install cargo-sbom
       - name: Generate SBOM (CycloneDX)
-        working-directory: vordr
+        working-directory: tools/mvp/svalinn-gate
         run: |
-          cargo sbom --output-format cyclonedx-json > ../sbom-cyclonedx.json
+          cargo sbom --output-format cyclonedx-json > "$GITHUB_WORKSPACE/sbom-cyclonedx.json"
       - name: Generate SBOM (SPDX)
-        working-directory: vordr
+        working-directory: tools/mvp/svalinn-gate
         run: |
-          cargo sbom --output-format spdx-json > ../sbom-spdx.json
+          cargo sbom --output-format spdx-json > "$GITHUB_WORKSPACE/sbom-spdx.json"
       - name: Upload SBOM
         uses: actions/upload-artifact@v7.0.1
         with:
@@ -187,16 +187,19 @@ jobs:
           body: |
             ## Installation
 
-            ### Quick Install (Linux)
+            1. Download `svalinn-gate-linux-x86_64` for your platform
+            2. Verify checksum: `sha256sum -c svalinn-gate-linux-x86_64.sha256`
+            3. Install: `sudo install svalinn-gate-linux-x86_64 /usr/local/bin/svalinn-gate`
+
+            ## Usage
+
             ```bash
-            curl -fsSL https://svalinn.dev/install.sh | bash
+            svalinn-gate verify --bundle B --trust-store T --policy P \
+              --image-digest sha256:HEX [--json]
             ```
 
-            ### Manual Install
-            1. Download the binary for your platform
-            2. Verify checksum: `sha256sum -c vordr-linux-x86_64.sha256`
-            3. Install: `sudo install vordr-linux-x86_64 /usr/local/bin/vordr`
-            4. Verify: `vordr doctor`
+            `verify` is the only subcommand. It exits 0 on admission and 1 on a
+            policy denial.
 
             ## Security
 
