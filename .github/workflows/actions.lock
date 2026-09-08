@@ -17,6 +17,9 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/upload-artifact@v7.0.1'
         - 'denoland/setup-deno@v2.0.5'
+    '.github/workflows/codeql.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'github/codeql-action@v4.37.9'
     '.github/workflows/dependabot-automerge.yml':
         - 'dependabot/fetch-metadata@v3.1.0'
     '.github/workflows/governance.yml': []
