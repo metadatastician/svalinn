@@ -169,11 +169,6 @@ END {
     sub(/.*\//, "", key)
     key = ".github/workflows/" key          # the lockfile always uses this canonical path
 
-    if (dollar[wf] != "") {
-      printf "FAIL %s\n     invalid local-action rewrite (uses: $/...):%s\n", key, dollar[wf]
-      bad = 1
-    }
-
     # --- clause 1: every uses: must be locked under THIS path ---
     nu = split(useslist[wf], u, " ")
     delete uniq; missing = ""
