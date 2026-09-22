@@ -30,6 +30,7 @@ workflows:
         - 'peter-evans/repository-dispatch@v4.0.1'
     '.github/workflows/label-triage.yml': []
     '.github/workflows/labels.yml': []
+    '.github/workflows/lock-sync-gate.yml': []
     '.github/workflows/mirror.yml':
         - 'hyperpolymath/standards@fad242d35291de1898242d6737ba02b74a59a2f2'
     '.github/workflows/oikosbot.yml':
