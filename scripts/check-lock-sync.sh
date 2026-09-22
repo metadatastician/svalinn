@@ -77,7 +77,8 @@ if [ "${#WORKFLOWS[@]}" -eq 0 ]; then
 fi
 
 read -r -d '' PROG <<'AWK' || true
-# owner/repo[/subpath...]@ref  ->  owner/repo@ref   ("" if not an external ref)
+# Normalize `r` to owner/repo@ref, discarding an action subpath.
+# Return "" for local or invalid references.
 function norm(r,   at, path, ref, n, parts) {
   at = 0
   for (n = length(r); n > 0; n--) { if (substr(r, n, 1) == "@") { at = n; break } }
@@ -89,8 +90,9 @@ function norm(r,   at, path, ref, n, parts) {
   return parts[1] "/" parts[2] "@" ref
 }
 
-# Fold case on the OWNER/REPO segment only, for comparison keys. GitHub resolves
-# owner and repository names case-insensitively, and this is measured, not assumed:
+# Return a comparison key for `r` by folding case only on its owner/repository
+# segment. GitHub resolves owner and repository names case-insensitively, and
+# this is measured, not assumed:
 # metadatastician/pong-ping's lockfile records sonarsource/sonarqube-scan-action@v8.2.1
 # while sonarqube.yml says SonarSource/..., and at commit cd5f90f that workflow ran
 # SUCCESS while codeql.yml at the SAME commit was startup_failure. A same-commit
