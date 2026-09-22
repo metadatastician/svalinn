@@ -77,7 +77,8 @@ if [ "${#WORKFLOWS[@]}" -eq 0 ]; then
 fi
 
 read -r -d '' PROG <<'AWK' || true
-# owner/repo[/subpath...]@ref  ->  owner/repo@ref   ("" if not an external ref)
+# Normalize an external action or reusable-workflow reference to its lockfile
+# dependency key (owner/repo@ref). Return "" for local or malformed references.
 function norm(r,   at, path, ref, n, parts) {
   at = 0
   for (n = length(r); n > 0; n--) { if (substr(r, n, 1) == "@") { at = n; break } }
