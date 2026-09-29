@@ -2,14 +2,13 @@
 = Rokur secrets gate — behavioural contract
 
 This document exists because the working Rokur gate implementation lives only
-in the ReScript-era copy of svalinn (`hyperpolymath/stapeln`'s
-`container-stack/svalinn/src/gateway/Gateway.res` and `src/mcp/Server.res`,
-before that copy was retired in favour of this repo). ReScript is banned
-estate-wide, so that code is not portable as-is — this spec captures its
-*exact behaviour* so it can be reimplemented in AffineScript/TypeScript
-without re-deriving the retry/timeout/deny semantics from scratch.
-
-See the follow-up issue for the reimplementation task.
+in a retired ReScript-era copy of Svalinn (`hyperpolymath/stapeln`'s
+`container-stack/svalinn/src/gateway/Gateway.res` and `src/mcp/Server.res`).
+That source is not present in this checkout, and the behavior described here
+has not been verified against the current Rokur API. This is historical
+reference material only; it does not identify or authorize a replacement
+language. Revalidate the contract with Rokur before implementing it. See
+`../language-and-ecosystem-audit.adoc` for the unresolved migration target.
 
 == Purpose
 
@@ -84,9 +83,8 @@ metadata before each retry — reproduce this for observability parity.
 The MCP server-side call site (`Server.res:121`, "Validates via PolicyEngine,
 checks Rokur gate, then delegates to Vordr") — i.e. *where* in the request
 pipeline this gate is invoked relative to policy validation and the Vördr
-delegation. Read that call site in the retired ReScript copy (available in
-`hyperpolymath/stapeln` git history prior to its removal, or in this repo's
-`git log` around the commit that added this document) before wiring the
-AffineScript/TypeScript version into the pipeline — this document only
-covers `authorizeContainerStart`'s own request/response behaviour, not its
-place in the surrounding call graph.
+delegation. The retired source is not available in this checkout, and this
+repository's shallow history cannot verify that call site. Recover and validate
+it from an authoritative source before wiring a Rokur gate into the pipeline;
+this document covers only the historical `authorizeContainerStart`
+request/response behavior, not its place in the current call graph.
