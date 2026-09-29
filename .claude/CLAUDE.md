@@ -23,7 +23,8 @@ The following files in `.machine_readable/` contain structured project metadata:
 
 | Language/Tool | Use Case | Notes |
 |---------------|----------|-------|
-| **AffineScript** | Primary application code | Compiles to JS, type-safe |
+| **AffineScript** | Existing Svalinn migration artifacts only | Not the Svalinn target under the recorded D3 handoff; do not infer a runnable implementation from `.affine` files |
+| **Ephapax** | Svalinn migration target under recorded Decision D3 | Proceed only after the Stage 0 readiness spike in `docs/ephapax-migration/HANDOFF.adoc` succeeds |
 | **Bun** | JS runtime & package management (tier 1) | Default for all new work. Runs compiled ESM/JS directly — no bundler step. Uses an npm-compatible `package.json` plus `bun.lock` — both are expected, not anti-patterns. |
 | **Rust** | Performance-critical, systems, WASM | Preferred for CLI tools |
 | **Tauri 2.0+** | Mobile apps (iOS/Android) | Rust backend + web UI |
@@ -86,12 +87,8 @@ Both are FOSS with independent governance (no Big Tech).
 - SHA-pinned dependencies
 - SPDX license headers on all files
 
-### TypeScript Exemptions (Approved)
+### Legacy TypeScript (Migration Debt; Not an Approval)
 
-The hyperpolymath "no new TypeScript" policy has the following approved exemptions in this repo. These are *not* policy violations — they are documented carve-outs.
+`tools/mvp/svalinn_gateway.ts` is the only runnable gateway currently recorded in this checkout, but its historical exception is **not** approval to use TypeScript or Deno for new work or production. Keep it only as a clearly marked legacy MVP until a tested replacement exists; do not extend it. The AffineScript files are incomplete, and the recorded Ephapax migration decision requires a readiness spike before porting. The authoritative target and runtime therefore still need to be reconciled; see `docs/language-and-ecosystem-audit.adoc`.
 
-| Path | Files | Rationale | Unblock condition |
-|---|---|---|---|
-| `tools/mvp/svalinn_gateway.ts` | 1 | MVP/prototype gateway tool for early validation; not promoted to production tier. | Promote svalinn to production tier; rewrite gateway in AffineScript at that point. |
-
-Adding to this list requires explicit user approval and an unblock condition. New TypeScript files outside this list are blocked by the RSR antipattern check.
+Other existing TypeScript test/benchmark files are also unresolved policy debt. Do not add new TypeScript files or broaden the exception. Removing or renaming a `.ts` file without migrating its implementation and build/runtime dependencies does not resolve the policy violation.

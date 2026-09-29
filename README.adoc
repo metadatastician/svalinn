@@ -21,7 +21,12 @@ image:https://img.shields.io/badge/spec-verified--container--spec-green.svg[Spec
 *Post-Cloud Security Architecture: Edge gateway for verified container operations.*
 
 [.lead]
-Svalinn is a Deno-based HTTP gateway that validates container operation requests and delegates to https://github.com/hyperpolymath/vordr[Vörðr]. It provides REST API access, JSON Schema validation, policy enforcement, OAuth2/JWT authentication, and a Compose-compatible orchestration CLI (`svalinn-compose`).
+Svalinn is an experimental container gateway project. Its only runnable gateway in this checkout is a separate Deno/TypeScript MVP at `tools/mvp/svalinn_gateway.ts`; the AffineScript files under `src/` and `ui/src/` are incomplete migration artifacts, not a runnable port. The MVP is retained as a legacy exception while the replacement language/runtime decision and migration are unresolved. See link:STATUS.md[measured status] and link:docs/language-and-ecosystem-audit.adoc[the language/ecosystem audit].
+
+[WARNING]
+====
+The Deno/TypeScript MVP is not compliant with the repository's stated language policy and is not production approval. It must not be extended as the long-term implementation. Removing it before a tested replacement exists would also remove the only runnable gateway.
+====
 
 == Project Status
 
@@ -30,24 +35,24 @@ Svalinn is a Deno-based HTTP gateway that validates container operation requests
 |Component |Status |Description
 
 |*Edge Gateway*
-|Complete
-|Hono-based HTTP server with JSON Schema validation (Deno)
+|MVP only (legacy Deno/TypeScript)
+|`tools/mvp/svalinn_gateway.ts` is the only runnable gateway recorded by `STATUS.md`; it is not the approved long-term implementation.
 
 |*Vörðr Integration*
-|Complete
-|MCP/JSON-RPC client delegating to Vörðr
+|Partial / unverified
+|The MVP has a Vörðr process integration; the AffineScript client is not compiled or verified.
 
 |*Policy Engine*
-|Complete
-|Configurable allow/deny rules per operation
+|Partial / unverified
+|AffineScript sources exist, but are incomplete migration artifacts; do not treat this component as production-ready.
 
 |*Authentication*
-|Complete
-|OAuth2/OIDC + JWT token validation middleware
+|Partial / unverified
+|AffineScript sources exist, but are incomplete migration artifacts; do not treat this component as production-ready.
 
 |*svalinn-compose*
-|Complete
-|Compose-compatible multi-container orchestration CLI
+|Not implemented
+|An orchestration source stub exists; there is no verified, runnable CLI.
 |===
 
 == Architecture
@@ -224,21 +229,14 @@ x-svalinn:
 
 ----
 svalinn/
-├── src/
-│   ├── main.ts             # HTTP gateway entry point
-│   ├── gateway/            # Request routing
-│   ├── validation/         # JSON Schema validation
-│   ├── policy/             # Policy engine (evaluator, store)
-│   ├── auth/               # OAuth2, JWT middleware
-│   ├── compose/            # svalinn-compose orchestrator
-│   ├── integrations/       # Cerro Torre, verified-container-spec
-│   ├── vordr/              # Vörðr MCP client
-│   ├── mcp/                # MCP tool definitions
-│   └── tests/              # Test suite
+├── src/                    # Incomplete AffineScript migration artifacts
+├── ui/src/                 # Incomplete AffineScript migration artifacts
+├── tools/mvp/              # Legacy runnable Deno/TypeScript MVP gateway
+├── tools/mvp/svalinn-gate/ # Rust MVP policy gate
+├── tests/                  # MVP, schema, and spec-mirror tests
 ├── spec/                   # JSON Schema definitions
-│   └── schemas/            # gateway-*.json, container-*.json
-├── Justfile                # Build commands
-└── deno.json               # Deno configuration
+├── Justfile                # Historical and current task recipes (audit before use)
+└── docs/language-and-ecosystem-audit.adoc
 ----
 
 == Integration with Svalinn Ecosystem
@@ -279,7 +277,7 @@ just precommit          # fmt + lint + check + test
 
 === Contributing
 
-* *Language Policy*: Deno/TypeScript only (no Node, npm, bun)
+* *Language Policy*: No new TypeScript or Deno work. The existing Deno/TypeScript MVP is legacy migration debt, not an approved production stack; see `.claude/CLAUDE.md` and `docs/language-and-ecosystem-audit.adoc`.
 * *Security*: HTTPS in production, no hardcoded secrets
 * *Licensing*: PMPL-1.0 OR MPL-2.0, SPDX headers required
 

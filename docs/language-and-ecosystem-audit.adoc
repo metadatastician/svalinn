@@ -1,0 +1,102 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= Language and ecosystem audit
+:toc:
+
+== Finding
+
+Svalinn was not ported *from* AffineScript to TypeScript. This checkout contains
+an AffineScript tree under `src/` and `ui/src/`, but those files are generated,
+incomplete migration artifacts, not a verified or runnable implementation. The
+working gateway is a separate MVP implementation at
+`tools/mvp/svalinn_gateway.ts` (run with Deno). It was kept as a temporary
+working surface while the AffineScript migration was incomplete. The repository
+explicitly grandfathered it in `.claude/CLAUDE.md`; that carve-out conflicts
+with an absolute TypeScript ban and is migration debt, not evidence that
+TypeScript is suitable or approved for production.
+
+This checkout does not contain the history needed to identify the original
+author or decision that introduced the MVP: its Git history is shallow and
+contains only the current baseline commit. The available evidence supports the
+above technical explanation, not a more specific historical claim.
+
+== Measured local inventory
+
+[cols="2,2,3",options="header"]
+|===
+| Surface | Observed state | Disposition
+
+| `tools/mvp/svalinn_gateway.ts`
+| Executable Deno/TypeScript gateway, wired into the Containerfile and CI. It
+  is the only runnable gateway recorded by `STATUS.md`.
+| Policy exception is not production approval. Replacing it safely requires a
+  runnable, tested implementation in the approved target language. Do not
+  silently remove it and leave the service without a gateway.
+
+| `src/**/*.affine`, `ui/src/**/*.affine`
+| 32 files are present. They contain generated partial ports, unresolved
+  migration markers, TODO holes, and retained ReScript excerpts (see
+  `STATUS.md`). No AffineScript compiler is installed in this environment.
+| Not evidence of a complete AffineScript implementation; compile and test the
+  migration before treating it as a replacement.
+
+| Other `.ts` files
+| `src/benches/svalinn_bench.ts`, `tests/mvp/gateway_config_test.ts`,
+  `tests/scripts/check_lock_sync_test.ts`, and two spec-mirror tests.
+| Tooling/test code still uses TypeScript outside the single exemption table
+  entry. Inventory and resolve these too; do not add more TypeScript.
+
+| Deno manifests and commands
+| Root and `src/deno.json`/lockfiles, `Containerfile`, CI, `Justfile`, and
+  `stapeln.toml` all refer to Deno. Several commands point to missing paths
+  such as `src/main.ts`.
+| Deno is also banned by `.claude/CLAUDE.md`; the whole runtime/build surface
+  needs migration, not a file-extension-only rename.
+
+| ReScript residue
+| `src/lib/rescript.lock`, ReScript dependencies in `ui/package.json`, and
+  recipes/docs still reference ReScript or missing `.res` sources.
+| Historical/migration residue. Remove only after confirming no required
+  artifact or linked consumer relies on it.
+|===
+
+== Cross-project scope and limitation
+
+The integration metadata names Vörðr, Rokur, Cerro Torre, Selur, and Stapeln.
+They are separate repositories and are not checked out in this workspace. In
+this environment, both `gh repo view` and `git ls-remote` returned “Repository
+not found” for `hyperpolymath/{vordr,rokur,cerro-torre,selur,stapeln}`. Therefore
+this audit does *not* claim to have inspected their source trees or removed
+anything from them. It only inspected Svalinn's checked-in links, contracts,
+configuration, and integration references. The URLs/owners or access for the
+linked repos must be corrected before a cross-repository language audit can be
+completed.
+
+== Conflicting target decisions
+
+The repository's records do not fully agree:
+
+* `.claude/CLAUDE.md` now follows the recorded D3 handoff: Ephapax is the
+  conditional target, and the TypeScript gateway is legacy debt.
+* `docs/ephapax-migration/HANDOFF.adoc` records Decision D3 as ReScript →
+  Ephapax, with a readiness spike required before any port; it explicitly says
+  AffineScript is not the target.
+* `STATUS.md` still calls for an AffineScript compiler spike and describes
+  AffineScript as the migration question.
+
+The D3 handoff says to stop if its readiness spike is not green. Resolve the
+stale STATUS.md direction against that decision before any full rewrite. No
+cross-project or production migration should be inferred from the partial
+`.affine` files.
+
+== Safe next steps
+
+. Confirm the authoritative target language and runtime (including whether D3
+  still governs).
+. Make the target compiler/runtime available and complete a small runnable
+  gateway spike, with CI and integration tests.
+. Resolve the additional TypeScript test/bench files and Deno/ReScript residue.
+. Replace the MVP only once the new gateway passes equivalent tests; then remove
+  the Deno/TypeScript exception, manifests, Containerfile path, CI setup, and
+  stale documentation together.
+. Re-run this inventory against the actual Vörðr, Rokur, Cerro Torre, Selur,
+  and Stapeln repositories once their canonical URLs/access are available.
