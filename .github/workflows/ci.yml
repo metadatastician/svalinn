@@ -169,7 +169,7 @@ jobs:
         run: deno task build
         working-directory: src
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: svalinn-binaries-linux
           path: src/dist/

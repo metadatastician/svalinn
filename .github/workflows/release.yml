@@ -63,7 +63,7 @@ jobs:
           sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256
           sha512sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha512
       - name: Upload artifact
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ matrix.artifact }}
           path: dist/
@@ -90,7 +90,7 @@ jobs:
         run: |
           cargo sbom --output-format spdx-json > "$GITHUB_WORKSPACE/sbom-spdx.json"
       - name: Upload SBOM
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: sbom
           path: |
@@ -109,7 +109,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
       - name: Download all artifacts
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8.0.2
         with:
           path: artifacts
       - name: Generate provenance
@@ -149,7 +149,7 @@ jobs:
           }
           EOF
       - name: Upload provenance
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: provenance
           path: provenance.json
@@ -166,7 +166,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
       - name: Download all artifacts
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8.0.2
         with:
           path: artifacts
       - name: Prepare release assets
