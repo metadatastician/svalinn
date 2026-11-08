@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: CC-BY-SA-4.0
+// SPDX-License-Identifier: CC-BY-SA-4.0 (prose)
+// SPDX-License-Identifier: MPL-2.0 (code)
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 image:[License: MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]
 image:[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-licence"]
@@ -25,7 +26,7 @@ Svalinn is an experimental container gateway project. Its only runnable gateway 
 
 [WARNING]
 ====
-The Deno/TypeScript MVP is not compliant with the repository's stated language policy and is not production approval. It must not be extended as the long-term implementation. Removing it before a tested replacement exists would also remove the only runnable gateway.
+The AffineScript + Bun/Deno MVP is not compliant with the repository's stated language policy and is not production approval. It must not be extended as the long-term implementation. Removing it before a tested replacement exists would also remove the only runnable gateway.
 ====
 
 == Project Status
@@ -35,7 +36,7 @@ The Deno/TypeScript MVP is not compliant with the repository's stated language p
 |Component |Status |Description
 
 |*Edge Gateway*
-|MVP only (legacy Deno/TypeScript)
+|MVP only (legacy TypeScript)
 |`tools/mvp/svalinn_gateway.ts` is the only runnable gateway recorded by `STATUS.md`; it is not the approved long-term implementation.
 
 |*Vörðr Integration*
@@ -231,7 +232,7 @@ x-svalinn:
 svalinn/
 ├── src/                    # Incomplete AffineScript migration artifacts
 ├── ui/src/                 # Incomplete AffineScript migration artifacts
-├── tools/mvp/              # Legacy runnable Deno/TypeScript MVP gateway
+├── tools/mvp/              # Legacy runnable TypeScript MVP gateway
 ├── tools/mvp/svalinn-gate/ # Rust MVP policy gate
 ├── tests/                  # MVP, schema, and spec-mirror tests
 ├── spec/                   # JSON Schema definitions
@@ -277,9 +278,8 @@ just precommit          # fmt + lint + check + test
 
 === Contributing
 
-* *Language Policy*: No new TypeScript or Deno work. The existing Deno/TypeScript MVP is legacy migration debt, not an approved production stack; see `.claude/CLAUDE.md` and `docs/language-and-ecosystem-audit.adoc`.
+* *Language Policy*: No new TypeScript work. The existing TypeScript MVP is legacy migration debt, not an approved production stack; see `.claude/CLAUDE.md` and `docs/language-and-ecosystem-audit.adoc`.
 * *Security*: HTTPS in production, no hardcoded secrets
-* *Licensing*: PMPL-1.0 OR MPL-2.0, SPDX headers required
 
 == License
 
@@ -292,6 +292,4 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 * https://github.com/hyperpolymath/vordr[Vörðr Container Engine]
 * https://github.com/hyperpolymath/verified-container-spec[Verified Container Specification]
 * https://github.com/hyperpolymath/cerro-torre[Cerro Torre Builder]
-* https://rescript-lang.org/[ReScript]
-* https://deno.land/[Deno]
 * https://modelcontextprotocol.io/[Model Context Protocol]
